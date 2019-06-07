@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "format": "prettier --write index.js"
+    "format": "prettier --write index.js *.html"
   },
   "devDependencies": {
     "prettier": "^1.18.0"
