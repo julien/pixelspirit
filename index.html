@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { overflow:hidden;margin:0;width:100%;height:100%; }
+    canvas { display:block;-webkit-transform: translateZ(0); }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+
+	<script src="index.js"></script>
+  <script>
+    addEventListener('load', function () {
+			glslCanvas(document.getElementById('canvas'));
+		});
+  </script>
+</body>
+</html>
+
