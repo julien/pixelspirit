@@ -18,11 +18,14 @@
   </head>
   <body>
     <canvas id="canvas"></canvas>
-
     <script src="index.js"></script>
     <script>
-      addEventListener("load", function() {
-        glslCanvas(document.getElementById("canvas"));
+      addEventListener("load", () => {
+        fetch("./00.glsl")
+          .then(res => res.text())
+          .then(res => {
+            glslCanvas(document.getElementById("canvas"), res);
+          });
       });
     </script>
   </body>
