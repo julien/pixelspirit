@@ -45,7 +45,6 @@
   var u_time = 0;
   var u_mouse = [0, 0];
 
-
   function init(canvas, fragmentShader) {
     canvas.width = winW;
     canvas.height = winH;
