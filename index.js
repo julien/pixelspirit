@@ -101,27 +101,18 @@
     gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
 
     a_positions = [
-      -1.0,
-      1.0, // top left
-      -1.0,
-      -1.0, // bottom left
-      1.0,
-      1.0, // top right
-      1.0,
-      -1.0 // bottom right
+      -1.0,  1.0, // top left
+      -1.0, -1.0, // bottom left
+       1.0,  1.0, // top right
+       1.0, -1.0 // bottom right
     ];
 
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(a_positions),
-      gl.STATIC_DRAW
-    );
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a_positions), gl.STATIC_DRAW);
 
     const vao = gl.createVertexArray();
     gl.bindVertexArray(vao);
 
     gl.enableVertexAttribArray(info.a_position);
-    // gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 2 * 4, 0);
     gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 0, 0);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
   }
@@ -160,36 +151,27 @@
     return shader;
   }
 
-  window.addEventListener(
-    "resize",
-    function() {
-      winW = window.innerWidth;
-      winH = window.innerHeight;
-      canvas.width = winW;
-      canvas.height = winH;
-      gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-    },
-    false
-  );
+  window.addEventListener("resize", function() {
+		winW = window.innerWidth;
+		winH = window.innerHeight;
+		gl.canvas.width = winW;
+		gl.canvas.height = winH;
+		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+	}, false);
 
-  document.addEventListener(
-    "mousemove",
-    function(e) {
-      u_mouse[0] = e.pageX;
-      u_mouse[1] = e.pageY * -1;
+  document.addEventListener("mousemove", function(e) {
+		u_mouse[0] = e.pageX;
+		u_mouse[1] = e.pageY * -1;
 
-      gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
-    },
-    false
-  );
+		gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
+	}, false);
 
   exports.glslCanvas = function(element, fragmentShader) {
     canvas = element;
-
     if (!fragmentShader) {
       fragmentShader = FRAGMENT_SHADER;
     }
-
     init(canvas, fragmentShader);
   };
+
 })(this);
