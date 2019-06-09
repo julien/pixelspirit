@@ -52,17 +52,18 @@
 		canvas.height = winH;
 
 		gl = canvas.getContext("webgl2");
-		if (!gl) {
+		if (!gl)
 			throw Error("Failed to initialize WebGL");
-		}
 
-		initReader();
+		reader = new FileReader();
+		reader.addEventListener("loadend", handleLoadEnd);
 
-		var program = initShaders(fragmentShader);
+		const program = initShaders(fragmentShader);
 		gl.useProgram(program);
 
 		initBuffers();
 		setUniforms();
+		addEventListeners();
 
 		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -162,55 +163,51 @@
 		return shader;
 	}
 
-	window.addEventListener("resize", function() {
-		winW = window.innerWidth;
-		winH = window.innerHeight;
-		gl.canvas.width = winW;
-		gl.canvas.height = winH;
-		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-	}, false);
+	function addEventListeners() {
+		window.addEventListener("resize", function() {
+			winW = window.innerWidth;
+			winH = window.innerHeight;
+			gl.canvas.width = winW;
+			gl.canvas.height = winH;
+			gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+		}, false);
 
-	document.addEventListener("mousemove", function(e) {
-		u_mouse[0] = e.pageX;
-		u_mouse[1] = e.pageY * -1;
+		document.addEventListener("mousemove", function(e) {
+			u_mouse[0] = e.pageX;
+			u_mouse[1] = e.pageY * -1;
 
-		gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
-	}, false);
+			gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
+		}, false);
 
-	document.body.addEventListener("dragover", function(e) {
-		e.preventDefault();
-		canvas.style.opacity = 0.5;
-	});
+		document.body.addEventListener("dragover", function(e) {
+			e.preventDefault();
+			canvas.style.opacity = 0.5;
+		});
 
-	document.body.addEventListener("drop", function(e) {
-		e.preventDefault();
-		canvas.style.opacity = 1.0;
+		document.body.addEventListener("drop", function(e) {
+			e.preventDefault();
+			canvas.style.opacity = 1.0;
 
-		if (e.dataTransfer.files.length > 0)
-			reader.readAsText(e.dataTransfer.files[0]);
-	});
-
-	function initReader() {
-		reader = new FileReader();
-		reader.addEventListener("loadend", handleLoadEnd);
+			if (e.dataTransfer.files.length > 0)
+				reader.readAsText(e.dataTransfer.files[0]);
+		});
 	}
 
 	function handleLoadEnd(e) {
 		if (requestId)
 			cancelAnimationFrame(requestId);
 
-		var program = initShaders(e.target.result);
+		const program = initShaders(e.target.result);
 		gl.useProgram(program);
 		initBuffers();
 		setUniforms();
 		loop();
 	}
 
-	exports.glslCanvas = function(element, fragmentShader) {
-		canvas = element;
-		if (!fragmentShader) {
+	exports.glslCanvas = function(canvas, fragmentShader) {
+		if (!fragmentShader)
 			fragmentShader = FRAGMENT_SHADER;
-		}
 		main(canvas, fragmentShader);
 	};
+
 }(this));
