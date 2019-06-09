@@ -181,12 +181,12 @@
 
 		document.body.addEventListener("dragover", function(e) {
 			e.preventDefault();
-			canvas.style.opacity = 0.5;
+			gl.canvas.style.opacity = 0.5;
 		});
 
 		document.body.addEventListener("drop", function(e) {
 			e.preventDefault();
-			canvas.style.opacity = 1.0;
+			gl.canvas.style.opacity = 1.0;
 
 			if (e.dataTransfer.files.length > 0)
 				reader.readAsText(e.dataTransfer.files[0]);
