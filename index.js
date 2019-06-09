@@ -1,5 +1,5 @@
 (function(exports) {
-  const VERTEX_SHADER = `#version 300 es
+	const VERTEX_SHADER = `#version 300 es
 	precision mediump float;
 
 	in vec2 a_position;
@@ -8,7 +8,7 @@
 		gl_Position = vec4(a_position, 0.0, 1.0);
 	}`;
 
-  const FRAGMENT_SHADER = `#version 300 es
+	const FRAGMENT_SHADER = `#version 300 es
 	precision mediump float;
 
 	uniform vec2 u_mouse;
@@ -32,126 +32,138 @@
 		outColor = vec4(sum - r, sum - g, sum - b, 1.0);
 	}`;
 
-  var winW = window.innerWidth;
-  var winH = window.innerHeight;
-  var lastTime = 0;
+	var winW = window.innerWidth;
+	var winH = window.innerHeight;
+	var lastTime = 0;
 
-  var canvas;
-  var gl;
-  var info;
-  var a_positionBuffer;
-  var a_positions = [];
+	var canvas;
+	var gl;
+	var info;
+	var a_positionBuffer;
+	var a_positions = [];
 
-  var u_time = 0;
-  var u_mouse = [0, 0];
+	var u_time = 0;
+	var u_mouse = [0, 0];
+	var reader;
+	var requestId;
 
-  function init(canvas, fragmentShader) {
-    canvas.width = winW;
-    canvas.height = winH;
+	function main(canvas, fragmentShader) {
+		canvas.width = winW;
+		canvas.height = winH;
 
-    gl = canvas.getContext("webgl2");
-    if (!gl) {
-      throw Error("Failed to initialize WebGL");
-    }
+		gl = canvas.getContext("webgl2");
+		if (!gl) {
+			throw Error("Failed to initialize WebGL");
+		}
 
-    initShaders(fragmentShader);
-    initBuffers();
+		initReader();
 
-    // set uniforms that can be set
-    gl.uniform1f(info.u_time, u_time);
-    gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
-    gl.uniform2f(info.u_resolution, winW, winH);
+		var program = initShaders(fragmentShader);
+		gl.useProgram(program);
 
-    // set size and draw
-    gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-    gl.clearColor(0.0, 0.0, 0.0, 1.0);
-    gl.disable(gl.DEPTH_TEST);
-    gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+		initBuffers();
+		setUniforms();
 
-    tick();
-  }
+		// set size and draw
+		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+		gl.clearColor(0.0, 0.0, 0.0, 1.0);
+		gl.disable(gl.DEPTH_TEST);
+		gl.enable(gl.BLEND);
+		gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-  function initShaders(fragmentShader) {
-    const vShader = createShader(gl, VERTEX_SHADER, gl.VERTEX_SHADER);
-    const fShader = createShader(gl, fragmentShader, gl.FRAGMENT_SHADER);
+		loop();
+	}
 
-    const program = gl.createProgram();
-    gl.attachShader(program, vShader);
-    gl.attachShader(program, fShader);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      err = gl.getProgramInfoLog(program);
-      gl.deleteProgram(program);
-      throw err;
-    }
-    gl.useProgram(program);
+	function initShaders(fragmentShader) {
+		const vShader = createShader(gl, VERTEX_SHADER, gl.VERTEX_SHADER);
+		const fShader = createShader(gl, fragmentShader, gl.FRAGMENT_SHADER);
 
-    info = {
-      a_position: gl.getAttribLocation(program, "a_position"),
-      u_mouse: gl.getUniformLocation(program, "u_mouse"),
-      u_resolution: gl.getUniformLocation(program, "u_resolution"),
-      u_time: gl.getUniformLocation(program, "u_time")
-    };
-  }
+		const program = gl.createProgram();
+		gl.attachShader(program, vShader);
+		gl.attachShader(program, fShader);
+		gl.linkProgram(program);
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+			err = gl.getProgramInfoLog(program);
+			gl.deleteProgram(program);
+			throw err;
+		}
+		gl.deleteShader(vShader);
+		gl.deleteShader(fShader);
 
-  function initBuffers() {
-    a_positionBuffer = gl.createBuffer();
-    gl.enableVertexAttribArray(info.a_position);
-    gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
+		info = {
+			a_position: gl.getAttribLocation(program, "a_position"),
+			u_mouse: gl.getUniformLocation(program, "u_mouse"),
+			u_resolution: gl.getUniformLocation(program, "u_resolution"),
+			u_time: gl.getUniformLocation(program, "u_time")
+		};
 
-    a_positions = [
-      -1.0,  1.0, // top left
-      -1.0, -1.0, // bottom left
-       1.0,  1.0, // top right
-       1.0, -1.0 // bottom right
-    ];
+		return program;
+	}
 
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a_positions), gl.STATIC_DRAW);
+	function initBuffers() {
+		a_positionBuffer = gl.createBuffer();
+		gl.enableVertexAttribArray(info.a_position);
+		gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
 
-    const vao = gl.createVertexArray();
-    gl.bindVertexArray(vao);
+		a_positions = [
+			-1.0,  1.0, // top left
+			-1.0, -1.0, // bottom left
+			1.0,  1.0, // top right
+			1.0, -1.0  // bottom right
+		];
 
-    gl.enableVertexAttribArray(info.a_position);
-    gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 0, 0);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
-  }
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a_positions), gl.STATIC_DRAW);
 
-  function tick() {
-    requestAnimationFrame(tick);
+		const vao = gl.createVertexArray();
+		gl.bindVertexArray(vao);
 
-    const now = new Date().getTime();
-    if (lastTime) {
-      const elapsed = now - lastTime;
+		gl.enableVertexAttribArray(info.a_position);
+		gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 0, 0);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
+	}
 
-      // update animation values
-      u_time += (2.0 * elapsed) / 1000.0;
-    }
-    lastTime = now;
-    draw();
-  }
+	function setUniforms() {
+		gl.uniform1f(info.u_time, u_time);
+		gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
+		gl.uniform2f(info.u_resolution, winW, winH);
+	}
 
-  function draw() {
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	function loop() {
+		if (!requestId)
+			requestId = requestAnimationFrame(loop);
 
-    u_time += 0.01;
-    gl.uniform1f(info.u_time, u_time);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
-  }
+		const now = new Date().getTime();
+		if (lastTime) {
+			const elapsed = now - lastTime;
 
-  function createShader(gl, src, type) {
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      const err = gl.getShaderInfoLog(shader);
-      gl.deleteShader(shader);
-      throw err;
-    }
-    return shader;
-  }
+			// update animation values
+			u_time += (2.0 * elapsed) / 1000.0;
+		}
+		lastTime = now;
+		draw();
+	}
 
-  window.addEventListener("resize", function() {
+	function draw() {
+		gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+		u_time += 0.01;
+		gl.uniform1f(info.u_time, u_time);
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
+	}
+
+	function createShader(gl, src, type) {
+		const shader = gl.createShader(type);
+		gl.shaderSource(shader, src);
+		gl.compileShader(shader);
+		if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+			const err = gl.getShaderInfoLog(shader);
+			gl.deleteShader(shader);
+			throw err;
+		}
+		return shader;
+	}
+
+	window.addEventListener("resize", function() {
 		winW = window.innerWidth;
 		winH = window.innerHeight;
 		gl.canvas.width = winW;
@@ -159,19 +171,47 @@
 		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 	}, false);
 
-  document.addEventListener("mousemove", function(e) {
+	document.addEventListener("mousemove", function(e) {
 		u_mouse[0] = e.pageX;
 		u_mouse[1] = e.pageY * -1;
 
 		gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
 	}, false);
 
-  exports.glslCanvas = function(element, fragmentShader) {
-    canvas = element;
-    if (!fragmentShader) {
-      fragmentShader = FRAGMENT_SHADER;
-    }
-    init(canvas, fragmentShader);
-  };
+	document.body.addEventListener('dragover', function(e) {
+		e.preventDefault();
+	});
+
+	document.body.addEventListener("drop", function(e) {
+		e.preventDefault();
+
+		if (e.dataTransfer.files.length > 0)
+			reader.readAsText(e.dataTransfer.files[0]);
+	});
+
+	function initReader() {
+		reader = new FileReader();
+		reader.addEventListener("loadend", handleLoadEnd);
+	}
+
+	function handleLoadEnd(e) {
+		if (requestId)
+			cancelAnimationFrame(requestId);
+
+
+		var program = initShaders(e.target.result);
+		gl.useProgram(program);
+		initBuffers();
+		setUniforms();
+		loop();
+	}
+
+	exports.glslCanvas = function(element, fragmentShader) {
+		canvas = element;
+		if (!fragmentShader) {
+			fragmentShader = FRAGMENT_SHADER;
+		}
+		main(canvas, fragmentShader);
+	};
 
 })(this);
