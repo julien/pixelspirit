@@ -36,7 +36,6 @@
 	var winH = window.innerHeight;
 	var lastTime = 0;
 
-	var canvas;
 	var gl;
 	var info;
 	var a_positionBuffer;
