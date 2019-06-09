@@ -64,7 +64,6 @@
 		initBuffers();
 		setUniforms();
 
-		// set size and draw
 		gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
 		gl.clearColor(0.0, 0.0, 0.0, 1.0);
 		gl.disable(gl.DEPTH_TEST);
@@ -178,12 +177,14 @@
 		gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
 	}, false);
 
-	document.body.addEventListener('dragover', function(e) {
+	document.body.addEventListener("dragover", function(e) {
 		e.preventDefault();
+		canvas.style.opacity = 0.5;
 	});
 
 	document.body.addEventListener("drop", function(e) {
 		e.preventDefault();
+		canvas.style.opacity = 1.0;
 
 		if (e.dataTransfer.files.length > 0)
 			reader.readAsText(e.dataTransfer.files[0]);
@@ -197,7 +198,6 @@
 	function handleLoadEnd(e) {
 		if (requestId)
 			cancelAnimationFrame(requestId);
-
 
 		var program = initShaders(e.target.result);
 		gl.useProgram(program);
@@ -213,5 +213,4 @@
 		}
 		main(canvas, fragmentShader);
 	};
-
-})(this);
+}(this));
