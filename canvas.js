@@ -45,172 +45,172 @@ let reader;
 let requestId;
 
 function main(canvas, fragmentShader) {
-  canvas.width = winW;
-  canvas.height = winH;
+	canvas.width = winW;
+	canvas.height = winH;
 
-  gl = canvas.getContext("webgl2");
-  if (!gl) throw Error("Failed to initialize WebGL");
+	gl = canvas.getContext('webgl2');
+	if (!gl) throw Error('Failed to initialize WebGL');
 
-  reader = new FileReader();
-  reader.addEventListener("loadend", handleLoadEnd);
+	reader = new FileReader();
+	reader.addEventListener('loadend', handleLoadEnd);
 
-  const program = initShaders(fragmentShader);
-  gl.useProgram(program);
+	const program = initShaders(fragmentShader);
+	gl.useProgram(program);
 
-  initBuffers();
-  setUniforms();
-  addEventListeners();
+	initBuffers();
+	setUniforms();
+	addEventListeners();
 
-  gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-  gl.clearColor(0.0, 0.0, 0.0, 1.0);
-  gl.disable(gl.DEPTH_TEST);
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+	gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+	gl.clearColor(0.0, 0.0, 0.0, 1.0);
+	gl.disable(gl.DEPTH_TEST);
+	gl.enable(gl.BLEND);
+	gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
 
-  loop();
+	loop();
 }
 
 function initShaders(fragmentShader) {
-  const vShader = createShader(gl, VERTEX_SHADER, gl.VERTEX_SHADER);
-  const fShader = createShader(gl, fragmentShader, gl.FRAGMENT_SHADER);
+	const vShader = createShader(gl, VERTEX_SHADER, gl.VERTEX_SHADER);
+	const fShader = createShader(gl, fragmentShader, gl.FRAGMENT_SHADER);
 
-  const program = gl.createProgram();
-  gl.attachShader(program, vShader);
-  gl.attachShader(program, fShader);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    err = gl.getProgramInfoLog(program);
-    gl.deleteProgram(program);
-    throw err;
-  }
-  gl.deleteShader(vShader);
-  gl.deleteShader(fShader);
+	const program = gl.createProgram();
+	gl.attachShader(program, vShader);
+	gl.attachShader(program, fShader);
+	gl.linkProgram(program);
+	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+		err = gl.getProgramInfoLog(program);
+		gl.deleteProgram(program);
+		throw err;
+	}
+	gl.deleteShader(vShader);
+	gl.deleteShader(fShader);
 
-  info = {
-    a_position: gl.getAttribLocation(program, "a_position"),
-    u_mouse: gl.getUniformLocation(program, "u_mouse"),
-    u_resolution: gl.getUniformLocation(program, "u_resolution"),
-    u_time: gl.getUniformLocation(program, "u_time")
-  };
+	info = {
+		a_position: gl.getAttribLocation(program, 'a_position'),
+		u_mouse: gl.getUniformLocation(program, 'u_mouse'),
+		u_resolution: gl.getUniformLocation(program, 'u_resolution'),
+		u_time: gl.getUniformLocation(program, 'u_time')
+	};
 
-  return program;
+	return program;
 }
 
 function initBuffers() {
-  a_positionBuffer = gl.createBuffer();
-  gl.enableVertexAttribArray(info.a_position);
-  gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
+	a_positionBuffer = gl.createBuffer();
+	gl.enableVertexAttribArray(info.a_position);
+	gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
 
-  a_positions = [
-    -1.0,
-    1.0, // top left
-    -1.0,
-    -1.0, // bottom left
-    1.0,
-    1.0, // top right
-    1.0,
-    -1.0 // bottom right
-  ];
+	a_positions = [
+		-1.0,
+		1.0, // top left
+		-1.0,
+		-1.0, // bottom left
+		1.0,
+		1.0, // top right
+		1.0,
+		-1.0 // bottom right
+	];
 
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a_positions), gl.STATIC_DRAW);
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(a_positions), gl.STATIC_DRAW);
 
-  const vao = gl.createVertexArray();
-  gl.bindVertexArray(vao);
+	const vao = gl.createVertexArray();
+	gl.bindVertexArray(vao);
 
-  gl.enableVertexAttribArray(info.a_position);
-  gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 0, 0);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
+	gl.enableVertexAttribArray(info.a_position);
+	gl.vertexAttribPointer(info.a_position, 2, gl.FLOAT, gl.FALSE, 0, 0);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
 }
 
 function setUniforms() {
-  gl.uniform1f(info.u_time, u_time);
-  gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
-  gl.uniform2f(info.u_resolution, winW, winH);
+	gl.uniform1f(info.u_time, u_time);
+	gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
+	gl.uniform2f(info.u_resolution, winW, winH);
 }
 
 function loop() {
-  if (!requestId) requestId = requestAnimationFrame(loop);
+	if (!requestId) requestId = requestAnimationFrame(loop);
 
-  const now = new Date().getTime();
-  if (lastTime) {
-    const elapsed = now - lastTime;
+	const now = new Date().getTime();
+	if (lastTime) {
+		const elapsed = now - lastTime;
 
-    // update animation values
-    u_time += (2.0 * elapsed) / 1000.0;
-  }
-  lastTime = now;
-  draw();
+		// update animation values
+		u_time += (2.0 * elapsed) / 1000.0;
+	}
+	lastTime = now;
+	draw();
 }
 
 function draw() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+	gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-  u_time += 0.01;
-  gl.uniform1f(info.u_time, u_time);
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
+	u_time += 0.01;
+	gl.uniform1f(info.u_time, u_time);
+	gl.drawArrays(gl.TRIANGLE_STRIP, 0, a_positions.length / 2);
 }
 
 function createShader(gl, src, type) {
-  const shader = gl.createShader(type);
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    const err = gl.getShaderInfoLog(shader);
-    gl.deleteShader(shader);
-    throw err;
-  }
-  return shader;
+	const shader = gl.createShader(type);
+	gl.shaderSource(shader, src);
+	gl.compileShader(shader);
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		const err = gl.getShaderInfoLog(shader);
+		gl.deleteShader(shader);
+		throw err;
+	}
+	return shader;
 }
 
 function addEventListeners() {
-  window.addEventListener(
-    "resize",
-    function() {
-      winW = window.innerWidth;
-      winH = window.innerHeight;
-      gl.canvas.width = winW;
-      gl.canvas.height = winH;
-      gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
-    },
-    false
-  );
+	window.addEventListener(
+		'resize',
+		function() {
+			winW = window.innerWidth;
+			winH = window.innerHeight;
+			gl.canvas.width = winW;
+			gl.canvas.height = winH;
+			gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+		},
+		false
+	);
 
-  document.addEventListener(
-    "mousemove",
-    function(e) {
-      u_mouse[0] = e.pageX;
-      u_mouse[1] = e.pageY * -1;
+	document.addEventListener(
+		'mousemove',
+		function(e) {
+			u_mouse[0] = e.pageX;
+			u_mouse[1] = e.pageY * -1;
 
-      gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
-    },
-    false
-  );
+			gl.uniform2f(info.u_mouse, u_mouse[0], u_mouse[1]);
+		},
+		false
+	);
 
-  document.body.addEventListener("dragover", function(e) {
-    e.preventDefault();
-    gl.canvas.style.opacity = 0.5;
-  });
+	document.body.addEventListener('dragover', function(e) {
+		e.preventDefault();
+		gl.canvas.style.opacity = 0.5;
+	});
 
-  document.body.addEventListener("drop", function(e) {
-    e.preventDefault();
-    gl.canvas.style.opacity = 1.0;
+	document.body.addEventListener('drop', function(e) {
+		e.preventDefault();
+		gl.canvas.style.opacity = 1.0;
 
-    if (e.dataTransfer.files.length > 0)
-      reader.readAsText(e.dataTransfer.files[0]);
-  });
+		if (e.dataTransfer.files.length > 0)
+			reader.readAsText(e.dataTransfer.files[0]);
+	});
 }
 
 function handleLoadEnd(e) {
-  if (requestId) cancelAnimationFrame(requestId);
+	if (requestId) cancelAnimationFrame(requestId);
 
-  const program = initShaders(e.target.result);
-  gl.useProgram(program);
-  initBuffers();
-  setUniforms();
-  loop();
+	const program = initShaders(e.target.result);
+	gl.useProgram(program);
+	initBuffers();
+	setUniforms();
+	loop();
 }
 
 export default function glslCanvas(canvas, fragmentShader) {
-  if (!fragmentShader) fragmentShader = FRAGMENT_SHADER;
-  main(canvas, fragmentShader);
+	if (!fragmentShader) fragmentShader = FRAGMENT_SHADER;
+	main(canvas, fragmentShader);
 }
