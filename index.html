@@ -14,15 +14,6 @@
 	</head>
 	<body>
 		<canvas id="canvas"></canvas>
-		<script src="index.js"></script>
-		<script>
-			addEventListener("load", () => {
-				fetch("./08.glsl")
-					.then(res => res.text())
-					.then(res => {
-						glslCanvas(document.getElementById("canvas"), res);
-					});
-			});
-		</script>
+		<script type="module" src="main.js"></script>
 	</body>
 </html>
