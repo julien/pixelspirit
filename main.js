@@ -163,19 +163,21 @@ function createShader(gl, src, type) {
 function addEventListeners() {
 	window.addEventListener(
 		'resize',
-		function() {
+		() => {
 			winW = window.innerWidth;
 			winH = window.innerHeight;
 			gl.canvas.width = winW;
 			gl.canvas.height = winH;
 			gl.viewport(0, 0, gl.canvas.clientWidth, gl.canvas.clientHeight);
+
+			gl.uniform2f(info.u_resolution, winW, winH);
 		},
 		false
 	);
 
 	document.addEventListener(
 		'mousemove',
-		function(e) {
+		(e) => {
 			u_mouse[0] = e.pageX;
 			u_mouse[1] = e.pageY * -1;
 
