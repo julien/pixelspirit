@@ -38,7 +38,6 @@ let gl;
 let info;
 let a_positionBuffer;
 let a_positions = [];
-
 let u_time = 0;
 let u_mouse = [0, 0];
 let reader;
@@ -50,7 +49,6 @@ function main(canvas, fragmentShader) {
 
 	gl = canvas.getContext('webgl2');
 	if (!gl) throw Error('Failed to initialize WebGL');
-
 
 	const program = initShaders(fragmentShader);
 	gl.useProgram(program);
