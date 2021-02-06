@@ -127,7 +127,7 @@ function setUniforms() {
 }
 
 function loop() {
-	if (!requestId) requestId = requestAnimationFrame(loop);
+	requestId = requestAnimationFrame(loop);
 
 	const now = new Date().getTime();
 	if (lastTime) {
