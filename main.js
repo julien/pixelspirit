@@ -51,8 +51,6 @@ function main(canvas, fragmentShader) {
 	gl = canvas.getContext('webgl2');
 	if (!gl) throw Error('Failed to initialize WebGL');
 
-	reader = new FileReader();
-	reader.addEventListener('loadend', handleLoadEnd);
 
 	const program = initShaders(fragmentShader);
 	gl.useProgram(program);
@@ -186,16 +184,20 @@ function addEventListeners() {
 		false
 	);
 
-	document.body.addEventListener('dragover', function(e) {
+	document.body.addEventListener('dragover', (e) => {
 		e.preventDefault();
 		gl.canvas.style.opacity = 0.5;
 	});
 
-	document.body.addEventListener('drop', function(e) {
+	document.body.addEventListener('drop', (e) => {
 		e.preventDefault();
 		gl.canvas.style.opacity = 1.0;
 
 		if (e.dataTransfer.files.length > 0)
+			if (!reader) {
+				reader = new FileReader();
+				reader.addEventListener('loadend', handleLoadEnd);
+			}
 			reader.readAsText(e.dataTransfer.files[0]);
 	});
 }
