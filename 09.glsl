@@ -29,8 +29,6 @@ void main() {
 
 	vec2 st = gl_FragCoord.xy / u_resolution;
 
-	// color += stroke(circleSDF(st), .5, .05);
-
 	color += fill(circleSDF(st), .65);
 
 	vec2 offset = vec2(.1, .05);
