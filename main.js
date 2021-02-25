@@ -50,10 +50,10 @@ function main(canvas, fragmentShader) {
 	gl = canvas.getContext('webgl2');
 	if (!gl) throw Error('Failed to initialize WebGL');
 
-	const program = initShaders(fragmentShader);
+	const program = createShaders(fragmentShader);
 	gl.useProgram(program);
 
-	initBuffers();
+	createBuffers();
 	setUniforms();
 	addEventListeners();
 
@@ -66,7 +66,7 @@ function main(canvas, fragmentShader) {
 	loop();
 }
 
-function initShaders(fragmentShader) {
+function createShaders(fragmentShader) {
 	const vShader = createShader(gl, VERTEX_SHADER, gl.VERTEX_SHADER);
 	const fShader = createShader(gl, fragmentShader, gl.FRAGMENT_SHADER);
 
@@ -92,7 +92,7 @@ function initShaders(fragmentShader) {
 	return program;
 }
 
-function initBuffers() {
+function createBuffers() {
 	a_positionBuffer = gl.createBuffer();
 	gl.enableVertexAttribArray(info.a_position);
 	gl.bindBuffer(gl.ARRAY_BUFFER, a_positionBuffer);
@@ -205,9 +205,9 @@ function addEventListeners() {
 function handleLoadEnd(e) {
 	if (requestId) cancelAnimationFrame(requestId);
 
-	const program = initShaders(e.target.result);
+	const program = createShaders(e.target.result);
 	gl.useProgram(program);
-	initBuffers();
+	createBuffers();
 	setUniforms();
 	loop();
 }
