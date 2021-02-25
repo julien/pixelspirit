@@ -131,7 +131,6 @@ function loop() {
 	if (lastTime) {
 		const elapsed = now - lastTime;
 
-		// update animation values
 		u_time += (2.0 * elapsed) / 1000.0;
 	}
 	lastTime = now;
